@@ -6,24 +6,15 @@ import {
 } from './stomp.constants'
 import { StompModuleOptions } from './stomp.interface'
 import { Client } from '@stomp/stompjs'
+import { w3cwebsocket } from 'websocket'
 
 export function createClientProvider (): Provider {
   return {
     provide: STOMP_CLIENT_INSTANCE,
     useFactory: (options: StompModuleOptions, logger: Logger) => {
-      Object.assign(global, {WebSocket: require('websocket').w3cwebsocket})
       const client = new Client(options)
+      client.webSocketFactory = options.webSocketFactory || (() => new w3cwebsocket(client.brokerURL, client.stompVersions.protocolVersions()))
       client.activate()
-
-      // stomp on connection
-
-      // stomp on disconnection
-
-      // stomp on error
-
-      // stomp on reconnect
-
-      // stomp on connection close
 
       return client
     },

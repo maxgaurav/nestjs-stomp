@@ -1,14 +1,16 @@
-import { LoggerService, Type } from '@nestjs/common';
-import { ModuleMetadata } from '@nestjs/common/interfaces';
-import { StompConfig, StompHeaders } from '@stomp/stompjs';
+import { LoggerService, Type } from '@nestjs/common'
+import { ModuleMetadata } from '@nestjs/common/interfaces'
+import { StompConfig, StompHeaders } from '@stomp/stompjs'
 
 export interface StompSubscribeOptions {
   queue: string;
-  payload: 'string' | 'json';
   headers?: Partial<StompHeaders>;
   transform?: AvailableStompTransforms;
   autoNack?: boolean;
   autoAck?: boolean;
+  defaultNackHeaders?: StompHeaders;
+  defaultAckHeaders?: StompHeaders;
+  subscriptionHeaders?: StompHeaders;
 }
 
 export type StompMessageTransformer = (payload: {
@@ -44,7 +46,7 @@ export interface StompModuleOptions extends Partial<StompConfig> {
 }
 
 export interface StompOptionsFactory {
-  createStompConnectOptions(): Promise<StompModuleOptions> | StompModuleOptions;
+  createStompConnectOptions (): Promise<StompModuleOptions> | StompModuleOptions;
 }
 
 export interface StompModuleAsyncOptions

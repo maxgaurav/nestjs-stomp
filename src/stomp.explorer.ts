@@ -42,7 +42,10 @@ export class StompExplorer implements OnModuleInit {
     }
   }
 
-
+  /**
+   * Starts connection
+   * @protected
+   */
   protected startConnection () {
     const providers: InstanceWrapper[] = this.discoveryService.getProviders()
     providers
@@ -93,6 +96,12 @@ export class StompExplorer implements OnModuleInit {
       scatterParameters[parameter.index] = parameter
     }
 
+    const subscriptionHeaders = subscriber.options.subscriptionHeaders || {}
+
+    if (!subscriptionHeaders.hasOwnProperty('ack')) {
+      subscriptionHeaders.ack = 'client'
+    }
+
     /**
      * Subscribe to connection
      */
@@ -103,15 +112,15 @@ export class StompExplorer implements OnModuleInit {
         ))
       } catch (e) {
         if (subscriber.options.autoNack) {
-          message.nack()
+          message.nack(subscriber.options.defaultNackHeaders)
         }
         throw e
       }
 
       if (subscriber.options.autoAck) {
-        message.ack()
+        message.ack(subscriber.options.defaultAckHeaders)
       }
-    }, {ack: 'client'})
+    }, subscriptionHeaders)
   }
 
   /**
