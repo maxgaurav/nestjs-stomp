@@ -40,6 +40,7 @@ export class StompExplorer implements OnModuleInit {
         this.connectionEstablished = true
       }
     }
+    this.client.activate()
   }
 
   /**
