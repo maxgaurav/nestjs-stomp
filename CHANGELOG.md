@@ -1,6 +1,10 @@
 # CHANGE LOG
 
-## V1.0.2 (CURRENT)
+## V1.0.3 (CURRENT)
+### Fixes
+* Adding of injectable providers for async module configuration
+
+## V1.0.2
 ### Fixes
 * Async Provide injection for option factory fixed
 
