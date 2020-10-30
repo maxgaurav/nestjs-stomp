@@ -48,6 +48,7 @@ export function createOptionProviders (
       provide: options.useClass,
       useClass: options.useClass,
     },
+    ...(options.providers || [])
   ]
 }
 

@@ -1,4 +1,4 @@
-import { LoggerService, Type } from '@nestjs/common'
+import { LoggerService, Provider, Type } from '@nestjs/common';
 import { ModuleMetadata } from '@nestjs/common/interfaces'
 import { StompConfig, StompHeaders } from '@stomp/stompjs'
 
@@ -58,4 +58,5 @@ export interface StompModuleAsyncOptions
     ...args: any[]
   ) => Promise<StompModuleOptions> | StompModuleOptions;
   logger?: StompLoggerOptions;
+  providers?: Provider[];
 }
