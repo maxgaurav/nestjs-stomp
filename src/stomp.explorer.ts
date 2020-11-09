@@ -27,7 +27,7 @@ export class StompExplorer implements OnModuleInit {
     @Inject(STOMP_LOGGER_PROVIDER) private readonly logger: Logger,
     private readonly reflector: Reflector,
     @Inject(STOMP_OPTION_PROVIDER) private readonly options: StompModuleOptions,
-    @Inject(STOMP_CLIENT_INSTANCE) private readonly client: Client,
+    @Inject(STOMP_CLIENT_INSTANCE) public readonly client: Client,
   ) {
   }
 

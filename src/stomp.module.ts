@@ -10,7 +10,7 @@ import { STOMP_OPTION_PROVIDER } from './stomp.constants'
 @Global()
 @Module({
   imports: [DiscoveryModule],
-  providers: [StompService],
+  providers: [StompService, StompExplorer],
   exports: [StompService],
 })
 export class StompModule {
@@ -25,7 +25,7 @@ export class StompModule {
         StompExplorer,
         StompService,
       ],
-      exports: [],
+      exports: [StompService, StompExplorer],
     }
   }
 
@@ -42,7 +42,7 @@ export class StompModule {
         StompExplorer,
         StompService,
       ],
-      exports: [],
+      exports: [StompService, StompExplorer],
     }
   }
 }
