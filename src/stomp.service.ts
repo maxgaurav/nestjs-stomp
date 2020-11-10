@@ -1,10 +1,17 @@
-import { Inject, Injectable } from '@nestjs/common'
-import { STOMP_CLIENT_INSTANCE } from './stomp.constants'
+import { Injectable } from '@nestjs/common'
 import { Client, StompHeaders, StompSubscription } from '@stomp/stompjs'
+import { StompExplorer } from './stomp.explorer'
 
 @Injectable()
 export class StompService {
-  constructor (@Inject(STOMP_CLIENT_INSTANCE) private readonly client: Client) {
+  constructor (private readonly explorerService: StompExplorer) {
+  }
+
+  /**
+   * Main stomp client
+   */
+  public get client (): Client {
+    return this.explorerService.client
   }
 
   /**
@@ -66,7 +73,7 @@ export class StompService {
    * @param headers
    * @param skipContentLengthHeader
    */
-  public publishJson (queue: string, payload: object, headers?: StompHeaders, skipContentLengthHeader?: boolean) {
+  public publishJson (queue: string, payload: { [key: string]: any }, headers?: StompHeaders, skipContentLengthHeader?: boolean) {
     this.client.publish({
       destination: queue,
       skipContentLengthHeader,
