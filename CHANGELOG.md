@@ -1,6 +1,16 @@
 # CHANGE LOG
 
-## V1.0.3 (CURRENT)
+## v1.1.0 (CURRENT)
+### Changed
+* Exposing the StompExplorer service
+* Exposing the client in StompService
+* Stomp Client in StompService is reused rather than new one being created and injected
+
+### Fixed
+* Client not connected when injecting StompService
+
+
+## V1.0.3
 ### Fixes
 * Adding of injectable providers for async module configuration
 
