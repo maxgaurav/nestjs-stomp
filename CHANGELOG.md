@@ -1,6 +1,10 @@
 # CHANGE LOG
 
-## v1.1.0 (CURRENT)
+## v1.1.1 (CURRENT)
+### Fixed
+* For node v12 and above error thrown causing exit of client connection thus converted to logger log action 
+
+## v1.1.0
 ### Changed
 * Exposing the StompExplorer service
 * Exposing the client in StompService

@@ -1,6 +1,6 @@
 {
   "name": "@gauravgango/nestjs-stomp",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A Stomp module for Nest.js",
   "author": {
     "name": "Gaurav Gangopadhyay",
