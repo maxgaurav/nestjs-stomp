@@ -115,7 +115,7 @@ export class StompExplorer implements OnModuleInit {
         if (subscriber.options.autoNack) {
           message.nack(subscriber.options.defaultNackHeaders)
         }
-        throw e
+        this.logger.error(e);
       }
 
       if (subscriber.options.autoAck) {
