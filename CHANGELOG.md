@@ -1,6 +1,10 @@
 # CHANGE LOG
 
-## v1.1.1 (CURRENT)
+## v1.1.2 (CURRENT)
+### Changed
+* Moved error logging of nack action above nack action so that logging can be seen before.
+
+## v1.1.1
 ### Fixed
 * For node v12 and above error thrown causing exit of client connection thus converted to logger log action 
 
