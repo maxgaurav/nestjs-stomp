@@ -13,13 +13,15 @@ import {
   STOMP_SUBSCRIBE_OPTIONS, STOMP_SUBSCRIBER_PARAMS
 } from './stomp.constants'
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper'
-import { Client, IMessage } from '@stomp/stompjs'
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs'
 import { getTransform } from './transformers'
 
 @Injectable()
 export class StompExplorer implements OnModuleInit {
 
   private connectionEstablished = false
+
+  private subscriptions: StompSubscription[] = []
 
   constructor (
     protected readonly discoveryService: DiscoveryService,
@@ -34,8 +36,8 @@ export class StompExplorer implements OnModuleInit {
   onModuleInit () {
     this.logger.log('StompModule dependencies initialized')
     this.client.onConnect = () => {
+      this.logger.log('Connection to Stomp Client done')
       if (!this.connectionEstablished) {
-        this.logger.log('Connection to Stomp Client done')
         this.startConnection()
         this.connectionEstablished = true
       }
@@ -106,7 +108,7 @@ export class StompExplorer implements OnModuleInit {
     /**
      * Subscribe to connection
      */
-    this.client.subscribe(subscriber.queue, async (message) => {
+    const subscription = this.client.subscribe(subscriber.queue, async (message) => {
       try {
         await handler(...scatterParameters.map(
           (parameter) => this.parameterMapAction(message, subscriber, parameter)
@@ -119,6 +121,7 @@ export class StompExplorer implements OnModuleInit {
           } catch (nackErr) {
             this.logger.log('Unable to nack')
             this.logger.error(nackErr)
+            this.restartOnSubscriptionAckNackError()
           }
           return
         }
@@ -130,9 +133,12 @@ export class StompExplorer implements OnModuleInit {
         } catch (ackErr) {
           this.logger.log('Unable to ack')
           this.logger.error(ackErr)
+          this.restartOnSubscriptionAckNackError()
         }
       }
     }, subscriptionHeaders)
+
+    this.subscriptions.push(subscription)
   }
 
   /**
@@ -161,6 +167,41 @@ export class StompExplorer implements OnModuleInit {
         return message.nack
       default:
         null
+    }
+  }
+
+  /**
+   * Unsubscribe all active subscriptions through decorator
+   */
+  public unsubscribeAll () {
+    this.logger.log('Unsubscribing for all active subscriptions')
+    for (const subscription of this.subscriptions) {
+      try {
+        subscription.unsubscribe()
+      } catch (err) {
+        this.logger.log('Unable to unsubscribe from subscription. Hence forcefully removed.')
+        this.logger.error(err)
+      }
+    }
+    this.subscriptions = []
+  }
+
+  /**
+   * Restart all subscriptions
+   */
+  public restartSubscriptions () {
+    this.unsubscribeAll()
+    this.logger.log('Restarting all subscriptions')
+    this.startConnection()
+  }
+
+  /**
+   * Restart subscription based on restartOnSubscriptionAckNackError setting
+   * @private
+   */
+  private restartOnSubscriptionAckNackError () {
+    if (!!this.options.restartOnSubscriptionAckNackError) {
+      this.restartSubscriptions()
     }
   }
 }
