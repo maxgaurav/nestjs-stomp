@@ -14,6 +14,12 @@ export function createClientProvider (): Provider {
     useFactory: (options: StompModuleOptions, logger: Logger) => {
       const client = new Client(options)
       client.webSocketFactory = options.webSocketFactory || (() => new w3cwebsocket(client.brokerURL, client.stompVersions.protocolVersions()))
+      client.onStompError = (err) => {
+        logger.error(err)
+        if (options.onErrorHandler && typeof options.onErrorHandler === 'function') {
+          options.onErrorHandler(err)
+        }
+      }
 
       return client
     },

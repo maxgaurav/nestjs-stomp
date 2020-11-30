@@ -43,6 +43,7 @@ export interface StompLoggerOptions {
 
 export interface StompModuleOptions extends Partial<StompConfig> {
   logger?: StompLoggerOptions;
+  onErrorHandler? : (err) => void
 }
 
 export interface StompOptionsFactory {

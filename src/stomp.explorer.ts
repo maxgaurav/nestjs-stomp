@@ -112,14 +112,25 @@ export class StompExplorer implements OnModuleInit {
           (parameter) => this.parameterMapAction(message, subscriber, parameter)
         ))
       } catch (e) {
-        this.logger.error(e);
+        this.logger.error(e)
         if (subscriber.options.autoNack) {
-          message.nack(subscriber.options.defaultNackHeaders)
+          try {
+            message.nack(subscriber.options.defaultNackHeaders)
+          } catch (nackErr) {
+            this.logger.log('Unable to nack')
+            this.logger.error(nackErr)
+          }
+          return
         }
       }
 
       if (subscriber.options.autoAck) {
-        message.ack(subscriber.options.defaultAckHeaders)
+        try {
+          message.ack(subscriber.options.defaultAckHeaders)
+        } catch (ackErr) {
+          this.logger.log('Unable to ack')
+          this.logger.error(ackErr)
+        }
       }
     }, subscriptionHeaders)
   }
