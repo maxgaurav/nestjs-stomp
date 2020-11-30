@@ -1,5 +1,11 @@
 # CHANGE LOG
 
+# v1.2.0-alpha.1
+### Added
+* Config to auto restart of subscriptions when nac/ack actions fails
+* Added restart subscriptions action added via decorators through explorer service
+* Added unsubscribe subscriptions action added via decorators through explorer service 
+
 ## v1.1.3 (CURRENT)
 ### Added
 * Added stomp error callback in stomp options
