@@ -1,6 +1,16 @@
 # CHANGE LOG
 
-## v1.1.2 (CURRENT)
+## v1.1.3 (CURRENT)
+### Added
+* Added stomp error callback in stomp options
+
+### Fixed
+* Nack not exiting the message but continuing to call ack
+
+### Changed
+* Wrapped nack and ack auto actions inside try/catch with error message so that handling of messages does not break system.
+
+## v1.1.2
 ### Changed
 * Moved error logging of nack action above nack action so that logging can be seen before.
 
