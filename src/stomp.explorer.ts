@@ -200,8 +200,10 @@ export class StompExplorer implements OnModuleInit {
    * @private
    */
   private restartOnSubscriptionAckNackError () {
-    if (!!this.options.restartOnSubscriptionAckNackError) {
-      this.restartSubscriptions()
+    if (!!this.options.restartOnAckNackError) {
+      const delay = !!this.options.restartOnAckNackErrorDelay ? this.options.restartOnAckNackErrorDelay : 2000
+      setTimeout(() => this.restartSubscriptions(), delay);
+
     }
   }
 }

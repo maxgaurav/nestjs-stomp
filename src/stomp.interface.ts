@@ -44,7 +44,8 @@ export interface StompLoggerOptions {
 export interface StompModuleOptions extends Partial<StompConfig> {
   logger?: StompLoggerOptions;
   onErrorHandler? : (err) => void;
-  restartOnSubscriptionAckNackError?: boolean;
+  restartOnAckNackError?: boolean;
+  restartOnAckNackErrorDelay?: number;
 }
 
 export interface StompOptionsFactory {
