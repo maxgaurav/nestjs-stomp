@@ -1,5 +1,12 @@
 # CHANGE LOG
 
+# v1.2.0-alpha.2
+### Added
+* Delay restarting on ack/nack error
+
+### Change 
+* Changed config property **restartOnSubscriptionAckNackError** to **restartOnAckNackError**
+
 # v1.2.0-alpha.1
 ### Added
 * Config to auto restart of subscriptions when nac/ack actions fails
