@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common'
+import { Inject, Injectable, Logger, OnApplicationBootstrap, OnModuleInit } from '@nestjs/common'
 import {
   StompModuleOptions,
   StompSubscribeOptions,
@@ -17,7 +17,7 @@ import { Client, IMessage, StompSubscription } from '@stomp/stompjs'
 import { getTransform } from './transformers'
 
 @Injectable()
-export class StompExplorer implements OnModuleInit {
+export class StompExplorer implements OnApplicationBootstrap {
 
   private connectionEstablished = false
 
@@ -33,14 +33,13 @@ export class StompExplorer implements OnModuleInit {
   ) {
   }
 
-  onModuleInit () {
+  onApplicationBootstrap () {
     this.logger.log('StompModule dependencies initialized')
     this.client.onConnect = () => {
       this.logger.log('Connection to Stomp Client done')
-      if (!this.connectionEstablished) {
-        this.startConnection()
-        this.connectionEstablished = true
-      }
+      this.startConnection()
+      this.connectionEstablished = true
+
     }
     this.client.activate()
   }
@@ -202,7 +201,7 @@ export class StompExplorer implements OnModuleInit {
   private restartOnSubscriptionAckNackError () {
     if (!!this.options.restartOnAckNackError) {
       const delay = !!this.options.restartOnAckNackErrorDelay ? this.options.restartOnAckNackErrorDelay : 2000
-      setTimeout(() => this.restartSubscriptions(), delay);
+      setTimeout(() => this.restartSubscriptions(), delay)
 
     }
   }

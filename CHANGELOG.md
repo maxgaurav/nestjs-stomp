@@ -1,5 +1,9 @@
 # CHANGE LOG
 
+# v1.2.0-alpha.3
+### Added
+* Delay restarting on ack/nack error
+
 # v1.2.0-alpha.2
 ### Added
 * Delay restarting on ack/nack error
