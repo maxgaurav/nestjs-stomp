@@ -1,4 +1,10 @@
 # CHANGE LOG
+# v2.0.0-alpha.1
+### Breaking Change
+* Migrated underline package to stompit from stompjs
+* Return types changed for stomp service
+* Removed Inject parameter for queues like command
+* StompModule settings changed to include servers as array and reconect config
 
 # v1.2.0-alpha.3
 ### Added
@@ -17,7 +23,7 @@
 * Added restart subscriptions action added via decorators through explorer service
 * Added unsubscribe subscriptions action added via decorators through explorer service 
 
-## v1.1.3 (CURRENT)
+## v1.1.3
 ### Added
 * Added stomp error callback in stomp options
 
