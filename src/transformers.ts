@@ -4,17 +4,17 @@ import {
 } from './stomp.interface';
 
 export const JsonTransform: StompMessageTransformer = payload => {
-  return JSON.parse(payload.body.toString());
+  return JSON.parse(payload.messageString.toString());
 };
 
 export const TextTransform: StompMessageTransformer = payload => {
-  return payload.body.toString();
+  return payload.messageString.toString();
 };
 
 export const DefaultTransform: StompMessageTransformer = payload => payload;
 
 export const BinaryTransform: StompMessageTransformer = payload =>
-  payload.binaryBody;
+  payload.readableMessage;
 
 export function getTransform(
   transform: AvailableStompTransforms,

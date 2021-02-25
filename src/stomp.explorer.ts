@@ -1,5 +1,6 @@
-import { Inject, Injectable, Logger, OnApplicationBootstrap, OnModuleInit } from '@nestjs/common'
+import { Inject, Injectable, Logger, OnApplicationBootstrap } from '@nestjs/common'
 import {
+  StompHeaders,
   StompModuleOptions,
   StompSubscribeOptions,
   StompSubscriber,
@@ -13,15 +14,17 @@ import {
   STOMP_SUBSCRIBE_OPTIONS, STOMP_SUBSCRIBER_PARAMS
 } from './stomp.constants'
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper'
-import { Client, IMessage, StompSubscription } from '@stomp/stompjs'
 import { getTransform } from './transformers'
+import { ChannelSubscription } from 'stompit/lib/Channel'
+import { Channel, ChannelFactory } from 'stompit'
+import { Message as StompMessage } from 'stompit/lib/Client'
 
 @Injectable()
 export class StompExplorer implements OnApplicationBootstrap {
 
-  private connectionEstablished = false
+  private subscriptions: ChannelSubscription[] = [];
 
-  private subscriptions: StompSubscription[] = []
+  protected channel: Channel;
 
   constructor (
     protected readonly discoveryService: DiscoveryService,
@@ -29,19 +32,26 @@ export class StompExplorer implements OnApplicationBootstrap {
     @Inject(STOMP_LOGGER_PROVIDER) private readonly logger: Logger,
     private readonly reflector: Reflector,
     @Inject(STOMP_OPTION_PROVIDER) private readonly options: StompModuleOptions,
-    @Inject(STOMP_CLIENT_INSTANCE) public readonly client: Client,
+    @Inject(STOMP_CLIENT_INSTANCE) protected channelFactory: ChannelFactory,
   ) {
+  }
+
+  public get client(): Channel {
+    return this.channel;
   }
 
   onApplicationBootstrap () {
     this.logger.log('StompModule dependencies initialized')
-    this.client.onConnect = () => {
-      this.logger.log('Connection to Stomp Client done')
-      this.startConnection()
-      this.connectionEstablished = true
-
-    }
-    this.client.activate()
+    this.channelFactory.channel((error , channel)=> {
+      if (error) {
+        this.logger.error(`Unable to start channel with error: ${error.message}`);
+        this.logger.error(error);
+        return;
+      }
+      this.logger.log('Connection established with stomp');
+      this.channel = channel;
+      this.startConnection();
+    })
   }
 
   /**
@@ -104,60 +114,79 @@ export class StompExplorer implements OnApplicationBootstrap {
       subscriptionHeaders.ack = 'client'
     }
 
+    subscriptionHeaders.destination = subscriber.queue
+
     /**
      * Subscribe to connection
      */
-    const subscription = this.client.subscribe(subscriber.queue, async (message) => {
-      try {
-        await handler(...scatterParameters.map(
-          (parameter) => this.parameterMapAction(message, subscriber, parameter)
-        ))
-      } catch (e) {
-        this.logger.error(e)
-        if (subscriber.options.autoNack) {
-          try {
-            message.nack(subscriber.options.defaultNackHeaders)
-          } catch (nackErr) {
-            this.logger.log('Unable to nack')
-            this.logger.error(nackErr)
-            this.restartOnSubscriptionAckNackError()
-          }
+    const subscription = this.channel.subscribe(subscriptionHeaders, async (error, message) => {
+      if (error) {
+        this.logger.error('Unable to process subscription message');
+        this.logger.error(error);
+        return;
+      }
+      message.readString('utf-8', (error, messageAsString: string) => {
+        if (error) {
+          this.logger.error('Unable to parse message');
+          this.logger.error(error);
           return
         }
-      }
 
-      if (subscriber.options.autoAck) {
-        try {
-          message.ack(subscriber.options.defaultAckHeaders)
-        } catch (ackErr) {
-          this.logger.log('Unable to ack')
-          this.logger.error(ackErr)
-          this.restartOnSubscriptionAckNackError()
-        }
-      }
-    }, subscriptionHeaders)
+        this.handleMessage(scatterParameters, subscriber, message, messageAsString, subscriptionHeaders, handler);
+      })
+    })
 
     this.subscriptions.push(subscription)
+  }
+
+  protected async handleMessage(scatterParameters, subscriber, message: StompMessage, messageString: string, subscriptionHeaders, handler) {
+    try {
+      await handler(...scatterParameters.map(
+        (parameter) => this.parameterMapAction(message, messageString, subscriptionHeaders, subscriber, parameter)
+      ))
+    } catch (e) {
+      this.logger.error(e)
+      if (subscriber.options.autoNack) {
+        try {
+          this.channel.nack(message, subscriber.options.defaultNackHeaders)
+        } catch (nackErr) {
+          this.logger.log('Unable to nack')
+          this.logger.error(nackErr)
+          this.restartOnSubscriptionAckNackError()
+        }
+        return
+      }
+    }
+
+    if (subscriber.options.autoAck) {
+      try {
+        this.channel.ack(message, subscriber.options.defaultAckHeaders)
+      } catch (ackErr) {
+        this.logger.log('Unable to ack')
+        this.logger.error(ackErr)
+        this.restartOnSubscriptionAckNackError()
+      }
+    }
   }
 
   /**
    * Returns correct parameter based on decorators added
    * @param message
    * @param subscriber
+   * @param messageString
+   * @param subscriptionHeaders
    * @param parameter
    * @protected
    */
-  protected parameterMapAction (message: IMessage, subscriber: StompSubscriber, parameter: StompSubscriberParameter) {
+  protected parameterMapAction (message: StompMessage, messageString: string, subscriptionHeaders: StompHeaders, subscriber: StompSubscriber, parameter: StompSubscriberParameter) {
     switch (parameter?.type) {
       case 'headers':
-        return message.headers
-      case 'command':
-        return message.command
+        return subscriptionHeaders
       case 'message':
         const transform = getTransform(parameter.transform)
         const payload = {
-          body: message.body,
-          binaryBody: message.binaryBody
+          messageString: messageString,
+          readableMessage: message
         }
         return transform(payload)
       case 'ack':
