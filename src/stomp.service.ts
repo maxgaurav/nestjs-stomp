@@ -1,22 +1,22 @@
-import { Inject, Injectable, Logger } from '@nestjs/common'
-import { StompExplorer } from './stomp.explorer'
-import { Channel } from 'stompit'
-import { StompHeaders } from './stomp.interface'
-import { ChannelSubscription } from 'stompit/lib/Channel'
-import { STOMP_LOGGER_PROVIDER } from './stomp.constants'
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { StompExplorer } from './stomp.explorer';
+import { Channel } from 'stompit';
+import { StompHeaders } from './stomp.interface';
+import { ChannelSubscription } from 'stompit/lib/Channel';
+import { STOMP_LOGGER_PROVIDER } from './stomp.constants';
 
 @Injectable()
 export class StompService {
-  constructor (
+  constructor(
     @Inject(STOMP_LOGGER_PROVIDER) private logger: Logger,
-    private readonly explorerService: StompExplorer) {
-  }
+    private readonly explorerService: StompExplorer,
+  ) {}
 
   /**
    * Main stomp client
    */
-  public get client (): Channel {
-    return this.explorerService.client
+  public get client(): Channel {
+    return this.explorerService.client;
   }
 
   /**
@@ -25,32 +25,27 @@ export class StompService {
    * @param handler
    * @param headers
    */
-  public subscribe (
+  public subscribe(
     queue: string,
     handler,
     headers?: StompHeaders,
   ): ChannelSubscription {
-    headers = headers || {}
-    headers.ack = 'client'
-    headers.destination = queue
+    headers = headers || {};
+    headers.ack = 'client';
+    headers.destination = queue;
 
-    return this.client.subscribe(
-      headers,
-      async (error, message) => {
-        message.readString('utf-8', async (error, messageAsString: string) => {
-          if (error) {
-            this.logger.error('Unable to parse message')
-            this.logger.error(error)
-            return
-          }
+    return this.client.subscribe(headers, async (error, message) => {
+      message.readString('utf-8', async (error, messageAsString: string) => {
+        if (error) {
+          this.logger.error('Unable to parse message');
+          this.logger.error(error);
+          return;
+        }
 
-          await handler(message)
-          message.ack()
-
-        })
-
-      },
-    )
+        await handler(message);
+        message.ack();
+      });
+    });
   }
 
   //
@@ -88,7 +83,11 @@ export class StompService {
    * @param payload
    * @param headers
    */
-  public publishJson (queue: string, payload: { [key: string]: any }, headers?: StompHeaders) {
+  public publishJson(
+    queue: string,
+    payload: { [key: string]: any },
+    headers?: StompHeaders,
+  ) {
     headers = headers || {};
     headers.destination = queue;
     headers['content-type'] = 'text/plain';
@@ -101,7 +100,7 @@ export class StompService {
    * @param payload
    * @param headers
    */
-  public publishString (queue: string, payload: string, headers?: StompHeaders) {
+  public publishString(queue: string, payload: string, headers?: StompHeaders) {
     headers = headers || {};
     headers.destination = queue;
     headers['content-type'] = 'text/plain';

@@ -1,11 +1,11 @@
 import { LoggerService, Provider, Type } from '@nestjs/common';
-import { ModuleMetadata } from '@nestjs/common/interfaces'
-import { ConnectOptions } from 'stompit/lib/connect'
-import { ConnectFailoverOptions } from 'stompit/lib/ConnectFailover'
-import { Message } from 'stompit/lib/Client'
+import { ModuleMetadata } from '@nestjs/common/interfaces';
+import { ConnectOptions } from 'stompit/lib/connect';
+import { ConnectFailoverOptions } from 'stompit/lib/ConnectFailover';
+import { Message } from 'stompit/lib/Client';
 
 export interface StompHeaders {
-  [key: string]: any
+  [key: string]: any;
 }
 
 export interface StompSubscribeOptions {
@@ -49,7 +49,7 @@ export interface StompLoggerOptions {
 
 export interface StompModuleOptions {
   logger?: StompLoggerOptions;
-  onErrorHandler? : (err) => void;
+  onErrorHandler?: (err) => void;
   restartOnAckNackError?: boolean;
   restartOnAckNackErrorDelay?: number;
   servers: ConnectOptions[];
@@ -57,7 +57,7 @@ export interface StompModuleOptions {
 }
 
 export interface StompOptionsFactory {
-  createStompConnectOptions (): Promise<StompModuleOptions> | StompModuleOptions;
+  createStompConnectOptions(): Promise<StompModuleOptions> | StompModuleOptions;
 }
 
 export interface StompModuleAsyncOptions
