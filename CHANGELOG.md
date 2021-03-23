@@ -1,4 +1,12 @@
 # CHANGE LOG
+
+# v2.0.0-alpha.1
+## Added
+* Added connect info containing both channel factory and connect fail over instance for more granular control at user end
+* When client is null in stomp service it will throw error
+## Breaking Change
+* The client in **StompExplorerService** can now return null value if not connected successfully  
+
 # v2.0.0-alpha.1
 ### Breaking Change
 * Migrated underline package to stompit from stompjs
