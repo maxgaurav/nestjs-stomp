@@ -35,7 +35,7 @@ export function createClientProvider(): Provider {
         logger.error('connection error to ' + address + ': ' + error.message);
       });
 
-      return {channelFactory, connections};
+      return { channelFactory, connections };
     },
     inject: [STOMP_OPTION_PROVIDER, STOMP_LOGGER_PROVIDER],
   };
