@@ -16,6 +16,9 @@ export class StompService {
    * Main stomp client
    */
   public get client(): Channel {
+    if (!this.explorerService.client) {
+      throw new Error('Client is null');
+    }
     return this.explorerService.client;
   }
 
@@ -48,34 +51,6 @@ export class StompService {
     });
   }
 
-  //
-  // /**
-  //  * Unsubscribe to an subscription
-  //  */
-  // public unsubscribe (
-  //   stompSubscription: StompSubscription,
-  //   headers: StompHeaders,
-  // ) {
-  //   stompSubscription.unsubscribe(headers)
-  // }
-  //
-  // /**
-  //  * Publish raw message
-  //  * @param queue
-  //  * @param payload
-  //  * @param headers
-  //  * @param skipContentLengthHeader
-  //  */
-  // public publishRaw (queue: string, payload: { body?: string, binaryBody?: Uint8Array }, headers?: StompHeaders, skipContentLengthHeader?: boolean) {
-  //   this.client.publish({
-  //     destination: queue,
-  //     skipContentLengthHeader,
-  //     body: payload.body,
-  //     binaryBody: payload.binaryBody,
-  //     headers
-  //   })
-  // }
-  //
   /**
    * Publish JSON message.
    * It auto stringifies the message

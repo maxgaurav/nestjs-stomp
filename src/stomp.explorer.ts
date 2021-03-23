@@ -16,15 +16,15 @@ import {
 import { InstanceWrapper } from '@nestjs/core/injector/instance-wrapper'
 import { getTransform } from './transformers'
 import { ChannelSubscription } from 'stompit/lib/Channel'
-import { Channel, ChannelFactory } from 'stompit'
+import { Channel, ChannelFactory, ConnectFailover } from 'stompit'
 import { Message as StompMessage } from 'stompit/lib/Client'
 
 @Injectable()
 export class StompExplorer implements OnApplicationBootstrap {
 
-  private subscriptions: ChannelSubscription[] = [];
+  private subscriptions: ChannelSubscription[] = []
 
-  protected channel: Channel;
+  protected channel: Channel | null = null;
 
   constructor (
     protected readonly discoveryService: DiscoveryService,
@@ -32,25 +32,25 @@ export class StompExplorer implements OnApplicationBootstrap {
     @Inject(STOMP_LOGGER_PROVIDER) private readonly logger: Logger,
     private readonly reflector: Reflector,
     @Inject(STOMP_OPTION_PROVIDER) private readonly options: StompModuleOptions,
-    @Inject(STOMP_CLIENT_INSTANCE) protected channelFactory: ChannelFactory,
+    @Inject(STOMP_CLIENT_INSTANCE) public readonly connectionInfo: { channelFactory: ChannelFactory, connections: ConnectFailover },
   ) {
   }
 
-  public get client(): Channel {
-    return this.channel;
+  public get client (): Channel | null {
+    return this.channel
   }
 
   onApplicationBootstrap () {
     this.logger.log('StompModule dependencies initialized')
-    this.channelFactory.channel((error , channel)=> {
+    this.connectionInfo.channelFactory.channel((error, channel) => {
       if (error) {
-        this.logger.error(`Unable to start channel with error: ${error.message}`);
-        this.logger.error(error);
-        return;
+        this.logger.error(`Unable to start channel with error: ${error.message}`)
+        this.logger.error(error)
+        return
       }
-      this.logger.log('Connection established with stomp');
-      this.channel = channel;
-      this.startConnection();
+      this.logger.log('Connection established with stomp')
+      this.channel = channel
+      this.startConnection()
     })
   }
 
@@ -121,25 +121,25 @@ export class StompExplorer implements OnApplicationBootstrap {
      */
     const subscription = this.channel.subscribe(subscriptionHeaders, async (error, message) => {
       if (error) {
-        this.logger.error('Unable to process subscription message');
-        this.logger.error(error);
-        return;
+        this.logger.error('Unable to process subscription message')
+        this.logger.error(error)
+        return
       }
       message.readString('utf-8', (error, messageAsString: string) => {
         if (error) {
-          this.logger.error('Unable to parse message');
-          this.logger.error(error);
+          this.logger.error('Unable to parse message')
+          this.logger.error(error)
           return
         }
 
-        this.handleMessage(scatterParameters, subscriber, message, messageAsString, subscriptionHeaders, handler);
+        this.handleMessage(scatterParameters, subscriber, message, messageAsString, subscriptionHeaders, handler)
       })
     })
 
     this.subscriptions.push(subscription)
   }
 
-  protected async handleMessage(scatterParameters, subscriber, message: StompMessage, messageString: string, subscriptionHeaders, handler) {
+  protected async handleMessage (scatterParameters, subscriber, message: StompMessage, messageString: string, subscriptionHeaders, handler) {
     try {
       await handler(...scatterParameters.map(
         (parameter) => this.parameterMapAction(message, messageString, subscriptionHeaders, subscriber, parameter)
