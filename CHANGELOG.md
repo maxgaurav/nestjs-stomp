@@ -1,6 +1,11 @@
 # CHANGE LOG
 
-# v2.0.0-alpha.1
+# v2.0.0-alpha.3
+## Added
+* Auto attempt after 2 second to resubscribe a failed subscription attempt.
+
+
+# v2.0.0-alpha.2
 ## Added
 * Added connect info containing both channel factory and connect fail over instance for more granular control at user end
 * When client is null in stomp service it will throw error
@@ -31,7 +36,7 @@
 * Added restart subscriptions action added via decorators through explorer service
 * Added unsubscribe subscriptions action added via decorators through explorer service 
 
-## v1.1.3
+## v1.1.3 (CURRENT)
 ### Added
 * Added stomp error callback in stomp options
 
