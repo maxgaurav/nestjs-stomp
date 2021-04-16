@@ -18,6 +18,7 @@ import { getTransform } from './transformers'
 import { ChannelSubscription } from 'stompit/lib/Channel'
 import { Channel, ChannelFactory, ConnectFailover } from 'stompit'
 import { Message as StompMessage } from 'stompit/lib/Client'
+import { timer } from 'rxjs'
 
 @Injectable()
 export class StompExplorer implements OnApplicationBootstrap {
@@ -123,6 +124,8 @@ export class StompExplorer implements OnApplicationBootstrap {
       if (error) {
         this.logger.error('Unable to process subscription message')
         this.logger.error(error)
+        this.logger.log('Re attempting to subscribe after 2 second');
+        timer(2000).subscribe(() => this.subscribe(subscriber, handler, provider));
         return
       }
       message.readString('utf-8', (error, messageAsString: string) => {
